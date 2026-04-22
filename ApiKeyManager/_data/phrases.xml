@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<phrases>
+  <phrase title="cav7_api_key_manager" global_cache="0" version_id="1000010" version_string="1.0.0"><![CDATA[API Key Manager]]></phrase>
+  <phrase title="cav7_api_keys" global_cache="0" version_id="1000010" version_string="1.0.0"><![CDATA[API Keys]]></phrase>
+  <phrase title="cav7_api_key" global_cache="0" version_id="1000010" version_string="1.0.0"><![CDATA[API Key]]></phrase>
+  <phrase title="cav7_api_key_already_exists" global_cache="0" version_id="1000010" version_string="1.0.0"><![CDATA[You already have an active API key. Rotate your existing key if you need a new one.]]></phrase>
+  <phrase title="cav7_api_key_not_found" global_cache="0" version_id="1000010" version_string="1.0.0"><![CDATA[API key not found.]]></phrase>
+  <phrase title="cav7_api_key_new_key_warning" global_cache="0" version_id="1000010" version_string="1.0.0"><![CDATA[Copy this key now. It will not be shown again.]]></phrase>
+  <phrase title="cav7_api_key_rotate_confirm" global_cache="0" version_id="1000010" version_string="1.0.0"><![CDATA[Rotating your key will immediately invalidate your current key. Any integrations using it will stop working until updated. Continue?]]></phrase>
+  <phrase title="cav7_api_key_revoke_confirm" global_cache="0" version_id="1000010" version_string="1.0.0"><![CDATA[This will permanently delete your API key. Continue?]]></phrase>
+</phrases>
