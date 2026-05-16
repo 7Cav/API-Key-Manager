@@ -75,15 +75,21 @@ class ApiScope extends \XF\Admin\Controller\AbstractController
     {
         $form = $this->formAction();
 
-        $input = $this->filter([
-            'scope_name'          => 'str',
+        $filterMap = [
             'title'               => 'str',
             'description'         => 'str',
             'permission_group_id' => 'str',
             'permission_id'       => 'str',
             'is_active'           => 'bool',
             'display_order'       => 'uint',
-        ]);
+        ];
+
+        if (!$scope->exists())
+        {
+            $filterMap = ['scope_name' => 'str'] + $filterMap;
+        }
+
+        $input = $this->filter($filterMap);
 
         $form->basicEntitySave($scope, $input);
 

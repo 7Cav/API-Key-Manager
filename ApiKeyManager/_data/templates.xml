@@ -201,9 +201,15 @@
 <xf:form action="{{ link('cav7-api-scopes/save', $scope) }}" ajax="true" class="block">
 	<div class="block-container">
 		<div class="block-body">
-			<xf:textboxrow name="scope_name" value="{$scope.scope_name}"
-				label="{{ phrase('cav7_api_scope_name') }}"
-				explain="{{ phrase('cav7_api_scope_name_explain') }}" />
+			<xf:if is="$scope.scope_id">
+				<xf:inforow label="{{ phrase('cav7_api_scope_name') }}">
+					<code>{{ $scope.scope_name }}</code>
+				</xf:inforow>
+			<xf:else />
+				<xf:textboxrow name="scope_name" value="{$scope.scope_name}"
+					label="{{ phrase('cav7_api_scope_name') }}"
+					explain="{{ phrase('cav7_api_scope_name_explain') }}" />
+			</xf:if>
 
 			<xf:textboxrow name="title" value="{$scope.title}"
 				label="Title"
