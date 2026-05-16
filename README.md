@@ -8,7 +8,8 @@ A XenForo 2.3+ add-on that allows users to generate and manage personal API keys
 - Key prefix display for easy identification
 - Activate/deactivate keys without deleting them
 - Usage tracking via `last_used_date`
-- Read-only scope enforcement
+- Permission-gated scopes — each scope is tied to an XenForo permission and granted to a user's key automatically based on their forum permissions
+- Auto-revocation — when a user's permissions change, their key's scopes are recomputed; no manual reissue needed
 - Admin panel for viewing and revoking all keys
 
 ## Requirements
@@ -30,8 +31,11 @@ Users can generate and manage their API key from their **Account** page. Only on
 ### Admins
 Admins can view and revoke any user's API key via the ACP at **Admin > Cav7 API Keys**.
 
+### Scope management
+Admins define the available scopes in the ACP at **Admin > API Scopes**. Each scope has a name (the wire identifier used by the API consumer), a human title, and an optional gating XenForo permission. Scopes with no gating permission are granted to every user with a key; scopes with a gating permission are granted only to users who have it. Scope grants are recomputed automatically when a user's group membership or permission entries change.
+
 ### API Authentication
-Include the API key in requests to authenticate. Keys are validated directly against the database.
+Include the API key in requests to authenticate. The consumer API validates the key against the database and checks that the key holds the scope required by the requested endpoint. See the [7Cav API](https://github.com/7Cav/api) for the validation query and scope check.
 
 This add-on is specifically designed to work with the [7Cav API](https://github.com/7Cav/api).
 
