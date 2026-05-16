@@ -38,15 +38,6 @@ class Listener
             return;
         }
 
-        $keyExists = (bool) \XF::db()->fetchOne(
-            "SELECT key_id FROM xf_cav7_api_key WHERE user_id = ?",
-            $user->user_id
-        );
-        if (!$keyExists)
-        {
-            return;
-        }
-
         /** @var \Cav7\ApiKeyManager\Repository\ApiKey $repo */
         $repo = \XF::repository('Cav7\ApiKeyManager:ApiKey');
         $repo->recomputeScopesForUser((int) $user->user_id);
