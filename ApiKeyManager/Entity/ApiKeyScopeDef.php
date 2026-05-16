@@ -51,6 +51,15 @@ class ApiKeyScopeDef extends Entity
         }
     }
 
+    protected function _postDelete(): void
+    {
+        $this->db()->delete(
+            'xf_cav7_api_key_scope',
+            'scope_id = ?',
+            $this->scope_id
+        );
+    }
+
     public static function getStructure(Structure $structure): Structure
     {
         $structure->table      = 'xf_cav7_api_key_scope_def';
