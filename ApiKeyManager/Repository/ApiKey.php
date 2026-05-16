@@ -3,10 +3,11 @@
 namespace Cav7\ApiKeyManager\Repository;
 
 use Cav7\ApiKeyManager\Entity\ApiKey as ApiKeyEntity;
+use Cav7\ApiKeyManager\Entity\ApiKeyScopeDef;
 use XF\Mvc\Entity\Finder;
 use XF\Mvc\Entity\Repository;
 
-class ApiKeyRepository extends Repository
+class ApiKey extends Repository
 {
     public function generateKey(): array
     {
@@ -21,15 +22,18 @@ class ApiKeyRepository extends Repository
     public function findKeysForAdminList(): Finder
     {
         return $this->finder('Cav7\ApiKeyManager:ApiKey')
-            ->with('User')
+            ->with(['User', 'Scopes', 'Scopes.ScopeDef'])
             ->setDefaultOrder('created_date', 'DESC');
     }
 
     public function getKeyForUser(int $userId): ?ApiKeyEntity
     {
-        return $this->finder('Cav7\ApiKeyManager:ApiKey')
+        /** @var ApiKeyEntity|null $key */
+        $key = $this->finder('Cav7\ApiKeyManager:ApiKey')
+            ->with(['Scopes', 'Scopes.ScopeDef'])
             ->where('user_id', $userId)
             ->fetchOne();
+        return $key;
     }
 
     public function createKeyForUser(int $userId): array
@@ -41,10 +45,11 @@ class ApiKeyRepository extends Repository
         $key->user_id      = $userId;
         $key->key_hash     = $keyData['hash'];
         $key->key_prefix   = $keyData['prefix'];
-        $key->scope_read   = true;
         $key->is_active    = true;
         $key->created_date = \XF::$time;
         $key->save();
+
+        $this->recomputeScopesForUser($userId);
 
         return ['entity' => $key, 'raw' => $keyData['raw']];
     }
@@ -55,6 +60,66 @@ class ApiKeyRepository extends Repository
         $key->key_hash   = $keyData['hash'];
         $key->key_prefix = $keyData['prefix'];
         $key->save();
+
+        $this->recomputeScopesForUser($key->user_id);
+
         return $keyData['raw'];
+    }
+
+    public function recomputeScopesForUser(int $userId): void
+    {
+        $key = $this->finder('Cav7\ApiKeyManager:ApiKey')
+            ->where('user_id', $userId)
+            ->fetchOne();
+        if (!$key)
+        {
+            return;
+        }
+
+        /** @var \XF\Entity\User|null $user */
+        $user = $this->em->find('XF:User', $userId);
+        if (!$user)
+        {
+            return;
+        }
+
+        /** @var \Cav7\ApiKeyManager\Repository\ApiKeyScopeDef $scopeRepo */
+        $scopeRepo = $this->repository('Cav7\ApiKeyManager:ApiKeyScopeDef');
+        $defs = $scopeRepo->findActiveScopes()->fetch();
+
+        $grants = [];
+        /** @var ApiKeyScopeDef $def */
+        foreach ($defs as $def)
+        {
+            if ($def->permission_group_id === '' && $def->permission_id === '')
+            {
+                $grants[] = (int) $def->scope_id;
+                continue;
+            }
+            if ($user->hasPermission($def->permission_group_id, $def->permission_id))
+            {
+                $grants[] = (int) $def->scope_id;
+            }
+        }
+
+        $db = $this->db();
+        $db->beginTransaction();
+        try
+        {
+            $db->delete('xf_cav7_api_key_scope', 'key_id = ?', $key->key_id);
+            foreach ($grants as $scopeId)
+            {
+                $db->insert('xf_cav7_api_key_scope', [
+                    'key_id'   => $key->key_id,
+                    'scope_id' => $scopeId,
+                ]);
+            }
+            $db->commit();
+        }
+        catch (\Throwable $e)
+        {
+            $db->rollback();
+            throw $e;
+        }
     }
 }
