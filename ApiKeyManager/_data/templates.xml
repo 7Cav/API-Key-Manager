@@ -76,7 +76,7 @@
 	</div>
 </div>]]></template>
 
-  <template type="admin" title="cav7_api_key_list" version_id="1000010" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('cav7_api_keys') }}</xf:title>
+  <template type="admin" title="cav7_api_key_list" version_id="1010010" version_string="1.1.0"><![CDATA[<xf:title>{{ phrase('cav7_api_keys') }}</xf:title>
 
 <div class="block">
 	<div class="block-container">
@@ -105,7 +105,13 @@
 							</td>
 							<td><code>{{ $key.key_prefix }}...</code></td>
 							<td>
-								<xf:if is="$key.scope_read"><span class="label label--success">read</span></xf:if>
+								<xf:if is="$key.Scopes is not empty">
+									<xf:foreach loop="$key.Scopes" value="$grant">
+										<span class="label" title="{{ $grant.ScopeDef.scope_name }}">{{ $grant.ScopeDef.title }}</span>
+									</xf:foreach>
+								<xf:else />
+									<em>None</em>
+								</xf:if>
 							</td>
 							<td>{{ date_time($key.created_date) }}</td>
 							<td>
