@@ -65,7 +65,17 @@ class Setup extends AbstractSetup
 
     public function installStep4(): void
     {
-        $this->db()->insert('xf_cav7_api_key_scope_def', [
+        $db = $this->db();
+
+        $exists = (bool) $db->fetchOne(
+            "SELECT scope_id FROM xf_cav7_api_key_scope_def WHERE scope_name = 'read'"
+        );
+        if ($exists)
+        {
+            return;
+        }
+
+        $db->insert('xf_cav7_api_key_scope_def', [
             'scope_name'          => 'read',
             'title'               => 'Read',
             'description'         => 'Read access to public API data.',
@@ -154,7 +164,7 @@ class Setup extends AbstractSetup
         $this->db()->query("DROP TABLE IF EXISTS `xf_cav7_api_key`");
     }
 
-    protected function columnExists(string $table, string $column): bool
+    private function columnExists(string $table, string $column): bool
     {
         $row = $this->db()->fetchRow(
             "SHOW COLUMNS FROM `" . $table . "` LIKE ?",
