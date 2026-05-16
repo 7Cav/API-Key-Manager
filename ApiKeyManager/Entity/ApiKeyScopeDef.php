@@ -28,8 +28,17 @@ class ApiKeyScopeDef extends Entity
 
     protected function _preSave(): void
     {
-        $group = $this->permission_group_id;
-        $perm  = $this->permission_id;
+        $group = trim($this->permission_group_id);
+        $perm  = trim($this->permission_id);
+
+        if ($group !== $this->permission_group_id)
+        {
+            $this->set('permission_group_id', $group);
+        }
+        if ($perm !== $this->permission_id)
+        {
+            $this->set('permission_id', $perm);
+        }
 
         if (($group !== '' && $perm === '') || ($group === '' && $perm !== ''))
         {
