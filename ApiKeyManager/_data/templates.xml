@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates>
-  <template type="public" title="cav7_api_key_account" version_id="1000010" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('cav7_api_key') }}</xf:title>
+  <template type="public" title="cav7_api_key_account" version_id="1010010" version_string="1.1.0"><![CDATA[<xf:title>{{ phrase('cav7_api_key') }}</xf:title>
 <xf:wrap template="account_wrapper"/>
 
 <xf:if is="$apiKey">
@@ -12,10 +12,19 @@
 				<xf:if is="$apiKey.last_used_date">
 					<xf:inforow label="Last used">{{ date_time($apiKey.last_used_date) }}</xf:inforow>
 				</xf:if>
-				<xf:inforow label="Permissions">Read-only</xf:inforow>
+				<xf:inforow label="{{ phrase('cav7_api_key_permissions') }}"
+					hint="{{ phrase('cav7_api_key_permissions_explain') }}">
+					<xf:if is="$apiKey.Scopes is not empty">
+						<xf:foreach loop="$apiKey.Scopes" value="$grant">
+							<span class="label" title="{{ $grant.ScopeDef.description }}">{{ $grant.ScopeDef.title }}</span>
+						</xf:foreach>
+					<xf:else />
+						<em>{{ phrase('cav7_api_key_no_scopes') }}</em>
+					</xf:if>
+				</xf:inforow>
 			</div>
 			<div class="block-rowMessage block-rowMessage--warning">
-				Keep your API key secret. It grants read-only access to the 7Cav API on your behalf.
+				Keep your API key secret. It grants access to the 7Cav API on your behalf.
 			</div>
 			<div class="block-footer block-footer--separated">
 				<form method="post" action="{{ link('account/api-key-rotate') }}" data-xf-submit-confirm="{{ phrase('cav7_api_key_rotate_confirm') }}" style="display:inline-block;margin-right:8px;">
