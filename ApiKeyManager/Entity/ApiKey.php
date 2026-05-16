@@ -11,7 +11,6 @@ use XF\Mvc\Entity\Structure;
  * @property int $user_id
  * @property string $key_hash
  * @property string $key_prefix
- * @property bool $scope_read
  * @property bool $is_active
  * @property int $created_date
  * @property int $last_used_date
@@ -21,12 +20,22 @@ use XF\Mvc\Entity\Structure;
  *
  * RELATIONS
  * @property-read \XF\Entity\User|null $User
+ * @property-read \XF\Mvc\Entity\AbstractCollection|\Cav7\ApiKeyManager\Entity\ApiKeyScope[] $Scopes
  */
 class ApiKey extends Entity
 {
     public function getKeyDisplay(): string
     {
         return $this->key_prefix . '...';
+    }
+
+    protected function _postDelete(): void
+    {
+        $this->db()->delete(
+            'xf_cav7_api_key_scope',
+            'key_id = ?',
+            $this->key_id
+        );
     }
 
     public static function getStructure(Structure $structure): Structure
@@ -39,7 +48,6 @@ class ApiKey extends Entity
             'user_id'        => ['type' => self::UINT, 'required' => true],
             'key_hash'       => ['type' => self::BINARY, 'required' => true, 'maxlength' => 32],
             'key_prefix'     => ['type' => self::STR, 'required' => true, 'maxlength' => 12],
-            'scope_read'     => ['type' => self::BOOL, 'default' => true],
             'is_active'      => ['type' => self::BOOL, 'default' => true],
             'created_date'   => ['type' => self::UINT, 'default' => \XF::$time],
             'last_used_date' => ['type' => self::UINT, 'default' => 0],
@@ -53,6 +61,14 @@ class ApiKey extends Entity
                 'type'       => self::TO_ONE,
                 'conditions' => 'user_id',
                 'primary'    => true,
+            ],
+            'Scopes' => [
+                'entity'     => 'Cav7\ApiKeyManager:ApiKeyScope',
+                'type'       => self::TO_MANY,
+                'conditions' => 'key_id',
+                'key'        => 'scope_id',
+                'with'       => 'ScopeDef',
+                'order'      => 'scope_id',
             ],
         ];
 
