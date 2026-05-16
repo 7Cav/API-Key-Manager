@@ -22,7 +22,7 @@ class ApiKey extends Repository
     public function findKeysForAdminList(): Finder
     {
         return $this->finder('Cav7\ApiKeyManager:ApiKey')
-            ->with(['User', 'Scopes', 'Scopes.ScopeDef'])
+            ->with(['User', 'Scopes'])
             ->setDefaultOrder('created_date', 'DESC');
     }
 
@@ -30,7 +30,7 @@ class ApiKey extends Repository
     {
         /** @var ApiKeyEntity|null $key */
         $key = $this->finder('Cav7\ApiKeyManager:ApiKey')
-            ->with(['Scopes', 'Scopes.ScopeDef'])
+            ->with(['Scopes'])
             ->where('user_id', $userId)
             ->fetchOne();
         return $key;
@@ -49,7 +49,7 @@ class ApiKey extends Repository
         $key->created_date = \XF::$time;
         $key->save();
 
-        $this->recomputeScopesForUser($userId);
+        $this->recomputeScopesForUser($userId, $key);
 
         return ['entity' => $key, 'raw' => $keyData['raw']];
     }
@@ -61,19 +61,22 @@ class ApiKey extends Repository
         $key->key_prefix = $keyData['prefix'];
         $key->save();
 
-        $this->recomputeScopesForUser($key->user_id);
+        $this->recomputeScopesForUser((int) $key->user_id, $key);
 
         return $keyData['raw'];
     }
 
-    public function recomputeScopesForUser(int $userId): void
+    public function recomputeScopesForUser(int $userId, ?ApiKeyEntity $key = null): void
     {
-        $key = $this->finder('Cav7\ApiKeyManager:ApiKey')
-            ->where('user_id', $userId)
-            ->fetchOne();
         if (!$key)
         {
-            return;
+            $key = $this->finder('Cav7\ApiKeyManager:ApiKey')
+                ->where('user_id', $userId)
+                ->fetchOne();
+            if (!$key)
+            {
+                return;
+            }
         }
 
         /** @var \XF\Entity\User|null $user */
