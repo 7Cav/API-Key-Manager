@@ -43,10 +43,13 @@ class Listener
             return;
         }
 
+        // $manual = false so xf:run-jobs (the standard cron) picks it up.
+        // Default is true, which would queue it for manual-trigger only.
         \XF::app()->jobManager()->enqueueUnique(
             'cav7_recompute_scopes_all',
             'Cav7\ApiKeyManager:RecomputeKeyScopes',
-            ['all' => true]
+            ['all' => true],
+            false
         );
     }
 }
