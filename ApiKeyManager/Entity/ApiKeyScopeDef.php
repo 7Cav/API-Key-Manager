@@ -11,8 +11,7 @@ use XF\Mvc\Entity\Structure;
  * @property string $scope_name
  * @property string $title
  * @property string $description
- * @property string $permission_group_id
- * @property string $permission_id
+ * @property string $user_group_ids
  * @property bool $is_active
  * @property int $display_order
  *
@@ -23,26 +22,19 @@ class ApiKeyScopeDef extends Entity
 {
     public function getIsGated(): bool
     {
-        return $this->permission_group_id !== '' && $this->permission_id !== '';
+        return $this->user_group_ids !== '';
     }
 
     protected function _preSave(): void
     {
-        $group = trim($this->permission_group_id);
-        $perm  = trim($this->permission_id);
-
-        if ($group !== $this->permission_group_id)
+        $ids = array_filter(
+            array_map('intval', explode(',', (string) $this->user_group_ids)),
+            fn ($id) => $id > 0
+        );
+        $normalized = implode(',', array_values(array_unique($ids)));
+        if ($normalized !== $this->user_group_ids)
         {
-            $this->set('permission_group_id', $group);
-        }
-        if ($perm !== $this->permission_id)
-        {
-            $this->set('permission_id', $perm);
-        }
-
-        if (($group !== '' && $perm === '') || ($group === '' && $perm !== ''))
-        {
-            $this->error(\XF::phrase('cav7_api_scope_permission_pair_required'), 'permission_group_id');
+            $this->set('user_group_ids', $normalized);
         }
 
         if (!preg_match('/^[a-z][a-z0-9_:]*$/', $this->scope_name))
@@ -66,14 +58,13 @@ class ApiKeyScopeDef extends Entity
         $structure->shortName  = 'Cav7\ApiKeyManager:ApiKeyScopeDef';
         $structure->primaryKey = 'scope_id';
         $structure->columns = [
-            'scope_id'            => ['type' => self::UINT, 'autoIncrement' => true, 'nullable' => true],
-            'scope_name'          => ['type' => self::STR, 'required' => true, 'maxLength' => 50, 'unique' => true],
-            'title'               => ['type' => self::STR, 'required' => true, 'maxLength' => 100],
-            'description'         => ['type' => self::STR, 'default' => ''],
-            'permission_group_id' => ['type' => self::STR, 'default' => '', 'maxLength' => 25],
-            'permission_id'       => ['type' => self::STR, 'default' => '', 'maxLength' => 25],
-            'is_active'           => ['type' => self::BOOL, 'default' => true],
-            'display_order'       => ['type' => self::UINT, 'default' => 0],
+            'scope_id'        => ['type' => self::UINT, 'autoIncrement' => true, 'nullable' => true],
+            'scope_name'      => ['type' => self::STR, 'required' => true, 'maxLength' => 50, 'unique' => true],
+            'title'           => ['type' => self::STR, 'required' => true, 'maxLength' => 100],
+            'description'     => ['type' => self::STR, 'default' => ''],
+            'user_group_ids'  => ['type' => self::STR, 'default' => '', 'maxLength' => 255],
+            'is_active'       => ['type' => self::BOOL, 'default' => true],
+            'display_order'   => ['type' => self::UINT, 'default' => 0],
         ];
         $structure->getters = [
             'is_gated' => true,

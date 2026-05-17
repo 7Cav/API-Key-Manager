@@ -36,14 +36,13 @@ class Setup extends AbstractSetup
     {
         $this->db()->query("
             CREATE TABLE IF NOT EXISTS `xf_cav7_api_key_scope_def` (
-                `scope_id`              INT UNSIGNED   NOT NULL AUTO_INCREMENT,
-                `scope_name`            VARCHAR(50)    NOT NULL,
-                `title`                 VARCHAR(100)   NOT NULL,
-                `description`           TEXT           NOT NULL,
-                `permission_group_id`   VARCHAR(25)    NOT NULL DEFAULT '',
-                `permission_id`         VARCHAR(25)    NOT NULL DEFAULT '',
-                `is_active`             TINYINT(1)     NOT NULL DEFAULT 1,
-                `display_order`         INT UNSIGNED   NOT NULL DEFAULT 0,
+                `scope_id`         INT UNSIGNED   NOT NULL AUTO_INCREMENT,
+                `scope_name`       VARCHAR(50)    NOT NULL,
+                `title`            VARCHAR(100)   NOT NULL,
+                `description`      TEXT           NOT NULL,
+                `user_group_ids`   VARCHAR(255)   NOT NULL DEFAULT '',
+                `is_active`        TINYINT(1)     NOT NULL DEFAULT 1,
+                `display_order`    INT UNSIGNED   NOT NULL DEFAULT 0,
                 PRIMARY KEY (`scope_id`),
                 UNIQUE KEY `scope_name` (`scope_name`),
                 KEY `is_active_display_order` (`is_active`, `display_order`)
@@ -147,6 +146,17 @@ class Setup extends AbstractSetup
         {
             $db->query("ALTER TABLE xf_cav7_api_key DROP COLUMN `scope_read`");
         }
+    }
+
+    public function upgrade1020010Step1(): void
+    {
+        $sm = $this->schemaManager();
+
+        $sm->alterTable('xf_cav7_api_key_scope_def', function ($t) {
+            $t->addColumn('user_group_ids', 'varchar', 255)
+                ->setDefault('');
+            $t->dropColumns(['permission_group_id', 'permission_id']);
+        });
     }
 
     public function uninstallStep1(): void

@@ -86,6 +86,11 @@ class ApiKey extends Repository
             return;
         }
 
+        $userGroupIds = array_filter(array_map('intval', array_merge(
+            [(int) $user->user_group_id],
+            explode(',', (string) $user->secondary_group_ids)
+        )));
+
         /** @var \Cav7\ApiKeyManager\Repository\ApiKeyScopeDef $scopeRepo */
         $scopeRepo = $this->repository('Cav7\ApiKeyManager:ApiKeyScopeDef');
         $defs = $scopeRepo->findActiveScopes()->fetch();
@@ -94,12 +99,17 @@ class ApiKey extends Repository
         /** @var ApiKeyScopeDef $def */
         foreach ($defs as $def)
         {
-            if ($def->permission_group_id === '' && $def->permission_id === '')
+            $defGroupIds = array_filter(array_map(
+                'intval',
+                explode(',', (string) $def->user_group_ids)
+            ));
+
+            if (!$defGroupIds)
             {
                 $grants[] = (int) $def->scope_id;
                 continue;
             }
-            if ($user->hasPermission($def->permission_group_id, $def->permission_id))
+            if (array_intersect($userGroupIds, $defGroupIds))
             {
                 $grants[] = (int) $def->scope_id;
             }
