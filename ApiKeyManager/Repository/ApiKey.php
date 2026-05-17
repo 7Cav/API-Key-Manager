@@ -22,7 +22,7 @@ class ApiKey extends Repository
     public function findKeysForAdminList(): Finder
     {
         return $this->finder('Cav7\ApiKeyManager:ApiKey')
-            ->with(['User', 'Scopes'])
+            ->with('User')
             ->setDefaultOrder('created_date', 'DESC');
     }
 
@@ -30,7 +30,6 @@ class ApiKey extends Repository
     {
         /** @var ApiKeyEntity|null $key */
         $key = $this->finder('Cav7\ApiKeyManager:ApiKey')
-            ->with(['Scopes'])
             ->where('user_id', $userId)
             ->fetchOne();
         return $key;
