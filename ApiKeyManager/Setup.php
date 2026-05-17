@@ -151,9 +151,15 @@ class Setup extends AbstractSetup
         $sm = $this->schemaManager();
 
         $sm->alterTable('xf_cav7_api_key_scope_def', function ($t) {
-            $t->addColumn('user_group_ids', 'varchar', 255)
-                ->setDefault('');
-            $t->dropColumns(['permission_group_id', 'permission_id']);
+            if (!$this->columnExists('xf_cav7_api_key_scope_def', 'user_group_ids'))
+            {
+                $t->addColumn('user_group_ids', 'varchar', 255)
+                    ->setDefault('');
+            }
+            if ($this->columnExists('xf_cav7_api_key_scope_def', 'permission_group_id'))
+            {
+                $t->dropColumns(['permission_group_id', 'permission_id']);
+            }
         });
     }
 
