@@ -22,7 +22,7 @@ class Listener
 
     protected static function onUserSave(\XF\Entity\User $user): void
     {
-        $changes = $user->getChanges();
+        $changes = $user->getNewValues();
         if (!isset($changes['user_group_id']) && !isset($changes['secondary_group_ids']))
         {
             return;
@@ -35,7 +35,7 @@ class Listener
 
     protected static function onScopeDefSave(\Cav7\ApiKeyManager\Entity\ApiKeyScopeDef $def): void
     {
-        $changes = $def->getChanges();
+        $changes = $def->getNewValues();
         if (!$def->isInsert()
             && !isset($changes['user_group_ids'])
             && !isset($changes['is_active']))

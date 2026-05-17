@@ -140,7 +140,7 @@
 	</div>
 </div>]]></template>
 
-  <template type="admin" title="cav7_api_scope_list" version_id="1010010" version_string="1.1.0"><![CDATA[<xf:title>{{ phrase('cav7_api_scopes') }}</xf:title>
+  <template type="admin" title="cav7_api_scope_list" version_id="1020010" version_string="1.2.0"><![CDATA[<xf:title>{{ phrase('cav7_api_scopes') }}</xf:title>
 
 <xf:pageaction>
 	<xf:button href="{{ link('cav7-api-scopes/add') }}" icon="add">Add scope</xf:button>
@@ -154,7 +154,7 @@
 					<tr>
 						<th>Name</th>
 						<th>Title</th>
-						<th>Gating permission</th>
+						<th>Gated to groups</th>
 						<th>Active</th>
 						<th>Order</th>
 						<th></th>
@@ -167,7 +167,7 @@
 							<td>{{ $scope.title }}</td>
 							<td>
 								<xf:if is="$scope.is_gated">
-									<code>{{ $scope.permission_group_id }}.{{ $scope.permission_id }}</code>
+									<code>{{ $scope.user_group_ids }}</code>
 								<xf:else />
 									<em>Ungated (everyone with a key)</em>
 								</xf:if>
@@ -196,7 +196,7 @@
 	</div>
 </div>]]></template>
 
-  <template type="admin" title="cav7_api_scope_edit" version_id="1010010" version_string="1.1.0"><![CDATA[<xf:title>{{ phrase('cav7_api_scope') }}<xf:if is="$scope.scope_id">: {$scope.title}</xf:if></xf:title>
+  <template type="admin" title="cav7_api_scope_edit" version_id="1020010" version_string="1.2.0"><![CDATA[<xf:title>{{ phrase('cav7_api_scope') }}<xf:if is="$scope.scope_id">: {$scope.title}</xf:if></xf:title>
 
 <xf:form action="{{ link('cav7-api-scopes/save', $scope) }}" ajax="true" class="block">
 	<div class="block-container">
@@ -219,18 +219,10 @@
 				label="Description" rows="3"
 				explain="{{ phrase('cav7_api_scope_description_explain') }}" />
 
-			<xf:formrow label="Gating permission" explain="{{ phrase('cav7_api_scope_permission_explain') }}">
-				<xf:select name="permission_group_id" value="{$scope.permission_group_id}" class="js-cav7PermGroup">
-					<xf:foreach loop="$permissionGroups" key="$gid" value="$gLabel">
-						<xf:option value="{$gid}">{$gLabel}</xf:option>
-					</xf:foreach>
-				</xf:select>
-				<xf:select name="permission_id" value="{$scope.permission_id}" class="js-cav7PermId">
-					<xf:option value="">(none)</xf:option>
-					<xf:foreach loop="$permissionsByGroup" key="$gid" value="$pids">
-						<xf:foreach loop="$pids" value="$pid">
-							<xf:option value="{$pid}" data-group="{$gid}">{$gid}.{$pid}</xf:option>
-						</xf:foreach>
+			<xf:formrow label="{{ phrase('cav7_api_scope_user_groups') }}" explain="{{ phrase('cav7_api_scope_user_groups_explain') }}">
+				<xf:select name="user_group_ids[]" multiple="true" value="{{ explode(',', $scope.user_group_ids) }}" size="8">
+					<xf:foreach loop="$userGroups" key="$groupId" value="$groupTitle">
+						<xf:option value="{$groupId}">{$groupTitle}</xf:option>
 					</xf:foreach>
 				</xf:select>
 			</xf:formrow>
