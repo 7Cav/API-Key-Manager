@@ -21,6 +21,7 @@ class ApiKey extends Repository
 
     public function findKeysForAdminList(): Finder
     {
+        // Scopes is TO_MANY; cannot eager-load via Finder::with().
         return $this->finder('Cav7\ApiKeyManager:ApiKey')
             ->with('User')
             ->setDefaultOrder('created_date', 'DESC');
@@ -28,6 +29,7 @@ class ApiKey extends Repository
 
     public function getKeyForUser(int $userId): ?ApiKeyEntity
     {
+        // Scopes is TO_MANY; cannot eager-load via Finder::with().
         /** @var ApiKeyEntity|null $key */
         $key = $this->finder('Cav7\ApiKeyManager:ApiKey')
             ->where('user_id', $userId)
