@@ -41,13 +41,15 @@ class ApiScope extends \XF\Admin\Controller\AbstractController
 
     protected function scopeAddEdit(ApiKeyScopeDef $scope): AbstractReply
     {
+        /** @var \XF\Repository\UserGroup $userGroupRepo */
+        $userGroupRepo = $this->repository('XF:UserGroup');
+
         return $this->view(
             'Cav7\ApiKeyManager:ApiScope\Edit',
             'cav7_api_scope_edit',
             [
-                'scope'            => $scope,
-                'permissionGroups' => $this->getPermissionGroupChoices(),
-                'permissionsByGroup' => $this->getPermissionsByGroup(),
+                'scope'      => $scope,
+                'userGroups' => $userGroupRepo->getUserGroupTitlePairs(),
             ]
         );
     }
@@ -76,12 +78,10 @@ class ApiScope extends \XF\Admin\Controller\AbstractController
         $form = $this->formAction();
 
         $filterMap = [
-            'title'               => 'str',
-            'description'         => 'str',
-            'permission_group_id' => 'str',
-            'permission_id'       => 'str',
-            'is_active'           => 'bool',
-            'display_order'       => 'uint',
+            'title'         => 'str',
+            'description'   => 'str',
+            'is_active'     => 'bool',
+            'display_order' => 'uint',
         ];
 
         if (!$scope->exists())
@@ -90,6 +90,9 @@ class ApiScope extends \XF\Admin\Controller\AbstractController
         }
 
         $input = $this->filter($filterMap);
+
+        $groupIds = $this->filter('user_group_ids', 'array-uint');
+        $scope->user_group_ids = implode(',', array_filter($groupIds));
 
         $form->basicEntitySave($scope, $input);
 
@@ -125,36 +128,6 @@ class ApiScope extends \XF\Admin\Controller\AbstractController
             throw $this->exception($this->notFound(\XF::phrase('cav7_api_scope_not_found')));
         }
         return $scope;
-    }
-
-    protected function getPermissionGroupChoices(): array
-    {
-        $rows = $this->app()->db()->fetchAll(
-            "SELECT DISTINCT permission_group_id
-             FROM xf_permission
-             ORDER BY permission_group_id"
-        );
-        $choices = ['' => '(none)'];
-        foreach ($rows as $row)
-        {
-            $choices[$row['permission_group_id']] = $row['permission_group_id'];
-        }
-        return $choices;
-    }
-
-    protected function getPermissionsByGroup(): array
-    {
-        $rows = $this->app()->db()->fetchAll(
-            "SELECT permission_group_id, permission_id
-             FROM xf_permission
-             ORDER BY permission_group_id, permission_id"
-        );
-        $byGroup = [];
-        foreach ($rows as $row)
-        {
-            $byGroup[$row['permission_group_id']][] = $row['permission_id'];
-        }
-        return $byGroup;
     }
 
     protected function getScopeRepo(): ApiKeyScopeDefRepo
