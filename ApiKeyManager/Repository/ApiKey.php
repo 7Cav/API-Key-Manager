@@ -87,9 +87,13 @@ class ApiKey extends Repository
             return;
         }
 
+        $secondaryGroupIds = is_array($user->secondary_group_ids)
+            ? $user->secondary_group_ids
+            : array_filter(explode(',', (string) $user->secondary_group_ids));
+
         $userGroupIds = array_filter(array_map('intval', array_merge(
             [(int) $user->user_group_id],
-            explode(',', (string) $user->secondary_group_ids)
+            $secondaryGroupIds
         )));
 
         /** @var \Cav7\ApiKeyManager\Repository\ApiKeyScopeDef $scopeRepo */
