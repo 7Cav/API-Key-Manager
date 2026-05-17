@@ -163,13 +163,4 @@ class Setup extends AbstractSetup
     {
         $this->db()->query("DROP TABLE IF EXISTS `xf_cav7_api_key`");
     }
-
-    private function columnExists(string $table, string $column): bool
-    {
-        $row = $this->db()->fetchRow(
-            "SHOW COLUMNS FROM `" . $table . "` LIKE ?",
-            [$column]
-        );
-        return (bool) $row;
-    }
 }

@@ -196,7 +196,7 @@
 	</div>
 </div>]]></template>
 
-  <template type="admin" title="cav7_api_scope_edit" version_id="1010010" version_string="1.1.0"><![CDATA[<xf:title>{{ $scope.scope_id ? phrase('cav7_api_scope') ~ ': ' ~ $scope.title : phrase('cav7_api_scope') }}</xf:title>
+  <template type="admin" title="cav7_api_scope_edit" version_id="1010010" version_string="1.1.0"><![CDATA[<xf:title>{{ phrase('cav7_api_scope') }}<xf:if is="$scope.scope_id">: {$scope.title}</xf:if></xf:title>
 
 <xf:form action="{{ link('cav7-api-scopes/save', $scope) }}" ajax="true" class="block">
 	<div class="block-container">
