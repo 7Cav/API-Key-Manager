@@ -2,7 +2,7 @@
 
 namespace Cav7\ApiKeyManager\Admin\Controller;
 
-use Cav7\ApiKeyManager\Repository\ApiKeyRepository as ApiKeyRepo;
+use Cav7\ApiKeyManager\Repository\ApiKey as ApiKeyRepo;
 use XF\Mvc\ParameterBag;
 use XF\Mvc\Reply\AbstractReply;
 

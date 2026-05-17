@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates>
-  <template type="public" title="cav7_api_key_account" version_id="1000010" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('cav7_api_key') }}</xf:title>
+  <template type="public" title="cav7_api_key_account" version_id="1010010" version_string="1.1.0"><![CDATA[<xf:title>{{ phrase('cav7_api_key') }}</xf:title>
 <xf:wrap template="account_wrapper"/>
 
 <xf:if is="$apiKey">
@@ -12,10 +12,19 @@
 				<xf:if is="$apiKey.last_used_date">
 					<xf:inforow label="Last used">{{ date_time($apiKey.last_used_date) }}</xf:inforow>
 				</xf:if>
-				<xf:inforow label="Permissions">Read-only</xf:inforow>
+				<xf:inforow label="{{ phrase('cav7_api_key_permissions') }}"
+					hint="{{ phrase('cav7_api_key_permissions_explain') }}">
+					<xf:if is="$apiKey.Scopes is not empty">
+						<xf:foreach loop="$apiKey.Scopes" value="$grant">
+							<span class="label" title="{{ $grant.ScopeDef.description }}">{{ $grant.ScopeDef.title }}</span>
+						</xf:foreach>
+					<xf:else />
+						<em>{{ phrase('cav7_api_key_no_scopes') }}</em>
+					</xf:if>
+				</xf:inforow>
 			</div>
 			<div class="block-rowMessage block-rowMessage--warning">
-				Keep your API key secret. It grants read-only access to the 7Cav API on your behalf.
+				Keep your API key secret. It grants access to the 7Cav API on your behalf.
 			</div>
 			<div class="block-footer block-footer--separated">
 				<form method="post" action="{{ link('account/api-key-rotate') }}" data-xf-submit-confirm="{{ phrase('cav7_api_key_rotate_confirm') }}" style="display:inline-block;margin-right:8px;">
@@ -67,7 +76,7 @@
 	</div>
 </div>]]></template>
 
-  <template type="admin" title="cav7_api_key_list" version_id="1000010" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('cav7_api_keys') }}</xf:title>
+  <template type="admin" title="cav7_api_key_list" version_id="1010010" version_string="1.1.0"><![CDATA[<xf:title>{{ phrase('cav7_api_keys') }}</xf:title>
 
 <div class="block">
 	<div class="block-container">
@@ -96,7 +105,13 @@
 							</td>
 							<td><code>{{ $key.key_prefix }}...</code></td>
 							<td>
-								<xf:if is="$key.scope_read"><span class="label label--success">read</span></xf:if>
+								<xf:if is="$key.Scopes is not empty">
+									<xf:foreach loop="$key.Scopes" value="$grant">
+										<span class="label" title="{{ $grant.ScopeDef.scope_name }}">{{ $grant.ScopeDef.title }}</span>
+									</xf:foreach>
+								<xf:else />
+									<em>None</em>
+								</xf:if>
 							</td>
 							<td>{{ date_time($key.created_date) }}</td>
 							<td>
@@ -124,4 +139,113 @@
 		</xf:if>
 	</div>
 </div>]]></template>
+
+  <template type="admin" title="cav7_api_scope_list" version_id="1020010" version_string="1.2.0"><![CDATA[<xf:title>{{ phrase('cav7_api_scopes') }}</xf:title>
+
+<xf:pageaction>
+	<xf:button href="{{ link('cav7-api-scopes/add') }}" icon="add">Add scope</xf:button>
+</xf:pageaction>
+
+<div class="block">
+	<div class="block-container">
+		<xf:if is="$scopes.count()">
+			<table class="dataList">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Title</th>
+						<th>Gated to groups</th>
+						<th>Active</th>
+						<th>Order</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<xf:foreach loop="$scopes" value="$scope">
+						<tr>
+							<td><code>{{ $scope.scope_name }}</code></td>
+							<td>{{ $scope.title }}</td>
+							<td>
+								<xf:if is="$scope.is_gated">
+									<code>{{ $scope.user_group_ids }}</code>
+								<xf:else />
+									<em>Ungated (everyone with a key)</em>
+								</xf:if>
+							</td>
+							<td>
+								<xf:if is="$scope.is_active">
+									<span class="label label--success">Active</span>
+								<xf:else />
+									<span class="label">Disabled</span>
+								</xf:if>
+							</td>
+							<td>{{ $scope.display_order }}</td>
+							<td class="dataList-col--action">
+								<a class="button button--small" href="{{ link('cav7-api-scopes/edit', $scope) }}">Edit</a>
+								<a class="button button--small button--danger" href="{{ link('cav7-api-scopes/delete', $scope) }}">Delete</a>
+							</td>
+						</tr>
+					</xf:foreach>
+				</tbody>
+			</table>
+		<xf:else />
+			<div class="block-body">
+				<div class="block-rowMessage">{{ phrase('cav7_api_scope_no_scopes') }}</div>
+			</div>
+		</xf:if>
+	</div>
+</div>]]></template>
+
+  <template type="admin" title="cav7_api_scope_edit" version_id="1020010" version_string="1.2.0"><![CDATA[<xf:title>{{ phrase('cav7_api_scope') }}<xf:if is="$scope.scope_id">: {$scope.title}</xf:if></xf:title>
+
+<xf:form action="{{ link('cav7-api-scopes/save', $scope) }}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:if is="$scope.scope_id">
+				<xf:inforow label="{{ phrase('cav7_api_scope_name') }}">
+					<code>{{ $scope.scope_name }}</code>
+				</xf:inforow>
+			<xf:else />
+				<xf:textboxrow name="scope_name" value="{$scope.scope_name}"
+					label="{{ phrase('cav7_api_scope_name') }}"
+					explain="{{ phrase('cav7_api_scope_name_explain') }}" />
+			</xf:if>
+
+			<xf:textboxrow name="title" value="{$scope.title}"
+				label="Title"
+				explain="{{ phrase('cav7_api_scope_title_explain') }}" />
+
+			<xf:textarearow name="description" value="{$scope.description}"
+				label="Description" rows="3"
+				explain="{{ phrase('cav7_api_scope_description_explain') }}" />
+
+			<xf:formrow label="{{ phrase('cav7_api_scope_user_groups') }}" explain="{{ phrase('cav7_api_scope_user_groups_explain') }}">
+				<xf:select name="user_group_ids[]" multiple="true" value="{{ explode(',', $scope.user_group_ids) }}" size="8">
+					<xf:foreach loop="$userGroups" key="$groupId" value="$groupTitle">
+						<xf:option value="{$groupId}">{$groupTitle}</xf:option>
+					</xf:foreach>
+				</xf:select>
+			</xf:formrow>
+
+			<xf:numberboxrow name="display_order" value="{$scope.display_order}"
+				label="Display order" min="0" />
+
+			<xf:checkboxrow>
+				<xf:option name="is_active" value="1" selected="{$scope.is_active}" label="Active" />
+			</xf:checkboxrow>
+		</div>
+		<xf:submitrow icon="save" sticky="true" />
+	</div>
+</xf:form>]]></template>
+
+  <template type="admin" title="cav7_api_scope_delete" version_id="1010010" version_string="1.1.0"><![CDATA[<xf:title>{{ phrase('cav7_api_scope') }}: {{ $scope.title }}</xf:title>
+
+<xf:form action="{{ link('cav7-api-scopes/delete', $scope) }}" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<div class="block-rowMessage">{{ phrase('cav7_api_scope_delete_confirm') }}</div>
+		</div>
+		<xf:submitrow icon="delete" sticky="true" />
+	</div>
+</xf:form>]]></template>
 </templates>
