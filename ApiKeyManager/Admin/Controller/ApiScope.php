@@ -91,6 +91,8 @@ class ApiScope extends \XF\Admin\Controller\AbstractController
 
         $input = $this->filter($filterMap);
 
+        // Assembled separately so basicEntitySave's bulkSet($input) does not
+        // overwrite it. Keep user_group_ids out of $filterMap.
         $groupIds = $this->filter('user_group_ids', 'array-uint');
         $scope->user_group_ids = implode(',', array_filter($groupIds));
 
