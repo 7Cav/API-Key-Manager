@@ -75,13 +75,11 @@ class Setup extends AbstractSetup
         }
 
         $db->insert('xf_cav7_api_key_scope_def', [
-            'scope_name'          => 'read',
-            'title'               => 'Read',
-            'description'         => 'Read access to public API data.',
-            'permission_group_id' => '',
-            'permission_id'       => '',
-            'is_active'           => 1,
-            'display_order'       => 0,
+            'scope_name'    => 'read',
+            'title'         => 'Read',
+            'description'   => 'Read access to public API data.',
+            'is_active'     => 1,
+            'display_order' => 0,
         ]);
     }
 
