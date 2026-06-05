@@ -54,7 +54,7 @@
 	</div>
 </xf:if>]]></template>
 
-  <template type="public" title="cav7_api_key_account_newkey" version_id="1000010" version_string="1.0.0"><![CDATA[<xf:title>{{ phrase('cav7_api_key') }}</xf:title>
+  <template type="public" title="cav7_api_key_account_newkey" version_id="1020110" version_string="1.2.1"><![CDATA[<xf:title>{{ phrase('cav7_api_key') }}</xf:title>
 <xf:wrap template="account_wrapper"/>
 
 <div class="block">
@@ -69,6 +69,18 @@
 				inputclass="input--mono"
 				readonly="true"
 				explain="Store this somewhere safe — it cannot be retrieved again." />
+			<xf:textboxrow label="Authorization header"
+				name="_cav7_key_auth_header"
+				value="Authorization: Bearer {$rawKey}"
+				inputclass="input--mono"
+				readonly="true"
+				explain="Send this header with every API request. The Bearer scheme is required — sending the key without it will be rejected. Always use the full cav7_-prefixed key shown above, not the shortened prefix… preview displayed on your key list." />
+			<xf:textboxrow label="Example request"
+				name="_cav7_key_curl_example"
+				value="curl -H &quot;Authorization: Bearer {$rawKey}&quot; https://&lt;api-host&gt;/api/v1/milpacs/awol"
+				inputclass="input--mono"
+				readonly="true"
+				explain="Replace &lt;api-host&gt; with the API host you are calling." />
 		</div>
 		<div class="block-footer">
 			<a href="{{ link('account/api-key') }}" class="button">Done</a>
